@@ -1,7 +1,9 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Đua Xe Đêm: Trốn Mẹ Về Nhà - 2.5D", page_icon="🛵", layout="centered"
+    page_title="Đua Xe Đêm: Trốn Mẹ Về Nhà - 2.5D Rider",
+    page_icon="🛵",
+    layout="centered",
 )
 
 game_html = """
@@ -9,11 +11,11 @@ game_html = """
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đua Xe Đêm: Trốn Mẹ Về Nhà - 2.5D</title>
+    <title>Đua Xe Đêm: Trốn Mẹ Về Nhà</title>
     <style>
         body {
             margin: 0;
-            background-color: #030712;
+            background-color: #05050a;
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -26,14 +28,14 @@ game_html = """
         }
         #game-container {
             position: relative;
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.4);
-            border: 4px solid #38bdf8;
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.4);
+            border: 4px solid #ff4757;
             border-radius: 14px;
             background: #000;
         }
         canvas {
             display: block;
-            background: linear-gradient(to bottom, #020617 0%, #0f172a 100%);
+            background: linear-gradient(to bottom, #020617 0%, #1e1b4b 100%);
         }
         #ui {
             position: absolute;
@@ -57,11 +59,11 @@ game_html = """
             padding: 0 30px;
         }
         .ctrl-btn {
-            background: rgba(56, 189, 248, 0.2);
-            border: 2px solid #38bdf8;
-            color: #38bdf8;
-            font-size: 26px;
-            width: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            font-size: 28px;
+            width: 85px;
             height: 55px;
             border-radius: 12px;
             cursor: pointer;
@@ -69,13 +71,12 @@ game_html = """
             user-select: none;
         }
         .ctrl-btn:active {
-            background: #38bdf8;
-            color: #0f172a;
+            background: rgba(255, 71, 87, 0.9);
         }
         #start-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(3, 7, 18, 0.95);
+            background: rgba(5, 5, 15, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -85,7 +86,7 @@ game_html = """
             z-index: 10;
         }
         button.start-btn {
-            background: linear-gradient(45deg, #0284c7, #38bdf8);
+            background: linear-gradient(45deg, #ff4757, #ff6b81);
             color: white;
             border: none;
             padding: 14px 32px;
@@ -94,7 +95,7 @@ game_html = """
             border-radius: 25px;
             cursor: pointer;
             margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.5);
             transition: 0.2s;
         }
         button.start-btn:hover {
@@ -108,7 +109,7 @@ game_html = """
     <canvas id="gameCanvas" width="480" height="640"></canvas>
     <div id="ui">
         <span id="scoreText">🏠 Khoảng cách: 1000m</span>
-        <span id="shText" style="color: #f87171;">🚨 Mẹ SH: 45m</span>
+        <span id="shText" style="color: #ff6b81;">🚨 Mẹ SH: 45m</span>
     </div>
     
     <div id="controls">
@@ -117,9 +118,9 @@ game_html = """
     </div>
 
     <div id="start-screen">
-        <h2 style="color: #38bdf8; margin-bottom: 5px;">🌙 ĐUA XE ĐÊM: TRỐN MẸ VỀ NHÀ (2.5D) 🛵</h2>
+        <h2 style="color: #ff4757; margin-bottom: 5px;">🌙 ĐUA XE ĐÊM: TRỐN MẸ VỀ NHÀ 🛵</h2>
         <p style="max-width: 360px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
-            Góc nhìn 2.5D phối cảnh chiều sâu! Lách xe điện trốn tiếng pô SH của mẹ gầm rú phía sau.
+            Góc nhìn 2.5D phía sau lưng xe cực bốc! Lách xe điện trốn tiếng pô SH của mẹ gầm rú phía sau.
             <br><br><b>Né ổ gà, tránh thùng rác và về nhà an toàn!</b>
         </p>
         <p style="font-size: 12px; color: #fbbf24;">💻 Máy tính: Phím <b>Trái/Phải</b> hoặc <b>A/D</b><br>📱 Điện thoại: Nút <b>◀ ▶</b> hoặc <b>Vuốt màn hình</b></p>
@@ -135,8 +136,8 @@ let gameRunning = false;
 let distance = 1000; 
 let shDistance = 45; 
 
-// 3 làn đường theo chiều sâu (Làn 0: Trái, Làn 1: Giữa, Làn 2: Phải)
-let playerLane = 1; // 0, 1, 2
+// 3 làn đường theo chiều sâu (0: Trái, 1: Giữa, 2: Phải)
+let playerLane = 1; 
 let obstacles = [];
 let obstacleTimer = 0;
 let roadAnim = 0;
@@ -176,29 +177,30 @@ function startGame() {
     loop();
 }
 
-// Hàm tính tọa độ X, Y theo phối cảnh 2.5D (z chạy từ 0 ở xa đến 1 ở gần)
+// Hàm tính tọa độ theo không gian phối cảnh 2.5D (z từ 0 ở chân trời đến 1 ở gần)
 function getPerspectiveCoords(lane, z) {
-    // Điểm tụ hội tụ ở giữa phía trên (horizon: x = 240, y = 160)
     let horizonX = 240;
-    let horizonY = 160;
+    let horizonY = 180;
+    let bottomY = 580;
     
-    // Đáy đường ở gần màn hình
-    let bottomY = 600;
-    let laneWidthBottom = 130;
+    // Độ rộng đường ở đáy và ở chân trời
+    let widthBottom = 340;
+    let widthHorizon = 40;
     
     let currentY = horizonY + (bottomY - horizonY) * z;
+    let currentWidth = widthHorizon + (widthBottom - widthHorizon) * z;
     
-    // Khoảng cách làn đường nở rộng dần theo z
-    let baseOffset = (lane - 1) * laneWidthBottom;
-    let currentX = horizonX + baseOffset * z;
+    // Tọa độ 3 làn: lane 0 (trái), lane 1 (giữa), lane 2 (phải)
+    let laneOffset = (lane - 1) * (currentWidth / 3);
+    let currentX = horizonX + laneOffset + (currentWidth / 6) * (lane === 0 ? 0.5 : (lane === 2 ? -0.5 : 0));
     
-    return { x: currentX, y: currentY };
+    return { x: currentX, y: currentY, width: currentWidth };
 }
 
 function update() {
     if (!gameRunning) return;
 
-    roadAnim += 0.04;
+    roadAnim += 0.05;
     if (roadAnim > 1) roadAnim = 0;
 
     distance -= 0.6;
@@ -206,15 +208,15 @@ function update() {
     if (shDistance > 75) shDistance = 75;
 
     obstacleTimer++;
-    if (obstacleTimer > 40) {
+    if (obstacleTimer > 38) {
         obstacleTimer = 0;
         let randomLane = Math.floor(Math.random() * 3);
         let types = ['ogap', 'thungrac'];
         let type = types[Math.floor(Math.random() * types.length)];
         obstacles.push({
             lane: randomLane,
-            z: 0.1, // Xuất hiện từ phía chân trời xa
-            speed: 0.018,
+            z: 0.1, // Xuất hiện từ xa (chân trời)
+            speed: 0.016,
             type: type
         });
     }
@@ -222,16 +224,16 @@ function update() {
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].z += obstacles[i].speed;
         
-        // Kiểm tra va chạm khi chướng ngại vật tiến đến gần người chơi (z khoảng từ 0.82 đến 0.95)
-        if (obstacles[i].z >= 0.82 && obstacles[i].z <= 0.95) {
+        // Kiểm tra va chạm khi chướng ngại vật đến gần người chơi (z từ 0.8 đến 0.93)
+        if (obstacles[i].z >= 0.8 && obstacles[i].z <= 0.93) {
             if (obstacles[i].lane === playerLane) {
-                shDistance -= 14; // Đâm trúng bị mẹ áp sát
+                shDistance -= 14; 
                 obstacles.splice(i, 1);
                 if (shDistance <= 0) gameOver(false);
             }
         } 
         
-        if (obstacles[i].z > 1.05) {
+        if (obstacles[i].z > 1.02) {
             obstacles.splice(i, 1);
         }
     }
@@ -246,65 +248,51 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Vẽ bầu trời đêm và đường chân trời
+    // 1. Vẽ bầu trời & đường chân trời
     ctx.fillStyle = "#020617";
-    ctx.fillRect(0, 0, 480, 160);
+    ctx.fillRect(0, 0, 480, 180);
 
-    // 2. Vẽ con đường 2.5D phối cảnh (Hình thang chụm lại ở xa)
+    // 2. Vẽ con đường nhựa 2.5D phối cảnh hình thang
     let horizonX = 240;
-    let horizonY = 160;
+    let horizonY = 180;
     
-    // Mặt đường nhựa chính
-    ctx.fillStyle = "#1e293b";
+    ctx.fillStyle = "#1e293b"; // Mặt đường
     ctx.beginPath();
     ctx.moveTo(horizonX - 25, horizonY);
     ctx.lineTo(horizonX + 25, horizonY);
-    ctx.lineTo(440, 600);
-    ctx.lineTo(40, 600);
+    ctx.lineTo(440, 580);
+    ctx.lineTo(40, 580);
     ctx.closePath();
     ctx.fill();
 
-    // Vỉa hè hai bên đường
+    // Vỉa hè hai bên
     ctx.fillStyle = "#0f172a";
     ctx.beginPath();
-    ctx.moveTo(0, 600);
-    ctx.lineTo(40, 600);
-    ctx.lineTo(horizonX - 25, horizonY);
-    ctx.lineTo(0, horizonY);
-    ctx.closePath();
-    ctx.fill();
-
+    ctx.moveTo(0, 580); ctx.lineTo(40, 580); ctx.lineTo(horizonX - 25, horizonY); ctx.lineTo(0, horizonY); ctx.closePath(); ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(480, 600);
-    ctx.lineTo(440, 600);
-    ctx.lineTo(horizonX + 25, horizonY);
-    ctx.lineTo(480, horizonY);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(480, 580); ctx.lineTo(440, 580); ctx.lineTo(horizonX + 25, horizonY); ctx.lineTo(480, horizonY); ctx.closePath(); ctx.fill();
 
-    // Vạch kẻ chia làn đường 2.5D chạy sâu vào trong
+    // Vạch kẻ chia làn đường chạy sâu vào trong
     ctx.strokeStyle = "#38bdf8";
     ctx.lineWidth = 3;
     
-    // Vạch phân cách trái
     ctx.beginPath();
     ctx.moveTo(horizonX - 8, horizonY);
-    ctx.lineTo(170, 600);
+    ctx.lineTo(170, 580);
     ctx.stroke();
 
-    // Vạch phân cách phải
     ctx.beginPath();
     ctx.moveTo(horizonX + 8, horizonY);
-    ctx.lineTo(310, 600);
+    ctx.lineTo(310, 580);
     ctx.stroke();
 
-    // 3. Vẽ Chướng ngại vật theo chiều sâu 2.5D
+    // 3. Chướng ngại vật lao từ xa tới
     for (let obs of obstacles) {
         let coords = getPerspectiveCoords(obs.lane, obs.z);
-        let scale = obs.z * 1.8; // Kích thước phóng to dần khi đến gần
+        let scale = obs.z * 1.6;
         
         ctx.save();
-        ctx.font = Math.floor(28 * scale) + "px Arial";
+        ctx.font = Math.floor(30 * scale) + "px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         if (obs.type === 'ogap') {
@@ -315,31 +303,30 @@ function draw() {
         ctx.restore();
     }
 
-    // 4. Vẽ Xe Điện của Con (Ở vị trí cố định gần màn hình z = 0.9)
-    let playerCoords = getPerspectiveCoords(playerLane, 0.9);
+    // 4. Xe điện của con (Góc nhìn từ phía sau lưng ở gần màn hình)
+    let playerCoords = getPerspectiveCoords(playerLane, 0.88);
     ctx.save();
-    ctx.font = "52px Arial";
+    ctx.font = "64px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("🛴", playerCoords.x, playerCoords.y);
     ctx.restore();
 
-    // 5. Vẽ Xe SH của Mẹ rượt đuổi phía sau (Phía dưới cùng màn hình)
+    // 5. Xe SH của mẹ rượt đuổi phía sau (Sắt sạt dưới đáy màn hình)
     ctx.save();
-    let shCoords = getPerspectiveCoords(1, 1.05);
-    let shAnimateX = shCoords.x + Math.sin(Date.now() * 0.009) * 25;
+    let shX = 240 + Math.sin(Date.now() * 0.009) * 30;
+    let shY = 600;
     
-    // Hiệu ứng đèn pha rực rỡ
-    let gradient = ctx.createRadialGradient(shAnimateX, shCoords.y, 10, shAnimateX, shCoords.y + 40, 120);
-    gradient.addColorStop(0, "rgba(56, 189, 248, 0.5)");
-    gradient.addColorStop(1, "rgba(56, 189, 248, 0)");
+    let gradient = ctx.createRadialGradient(shX, shY - 20, 10, shX, shY, 130);
+    gradient.addColorStop(0, "rgba(255, 71, 87, 0.5)");
+    gradient.addColorStop(1, "rgba(255, 71, 87, 0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 480, 480, 160);
 
-    ctx.font = "60px Arial";
+    ctx.font = "75px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("🛵", shAnimateX, shCoords.y + 10);
+    ctx.fillText("🛵", shX, shY);
     ctx.restore();
 }
 
@@ -350,7 +337,7 @@ function gameOver(isWin) {
     if (isWin) {
         startScreen.innerHTML = `
             <h1 style="color: #4ade80;">🎉 AN TOÀN VỀ NHÀ! 🎉</h1>
-            <p style="color: #fff;">Bạn đã né thành công và cất xe điện gọn gàng trước khi mẹ tóm!</p>
+            <p style="color: #fff;">Bạn đã phóng xe điện về nhà thành công trước khi mẹ kịp tóm!</p>
             <button class="start-btn" onclick="startGame()">CHƠI LẠI</button>
         `;
     } else {
