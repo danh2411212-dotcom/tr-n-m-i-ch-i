@@ -1,9 +1,7 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Đua Xe Đêm: Trốn Mẹ Về Nhà - 2.5D Rider",
-    page_icon="🛵",
-    layout="centered",
+    page_title="Đua Xe Đêm: Trốn Mẹ Về Nhà", page_icon="🛵", layout="centered"
 )
 
 game_html = """
@@ -15,7 +13,7 @@ game_html = """
     <style>
         body {
             margin: 0;
-            background-color: #05050a;
+            background-color: #030712;
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -35,7 +33,7 @@ game_html = """
         }
         canvas {
             display: block;
-            background: linear-gradient(to bottom, #020617 0%, #1e1b4b 100%);
+            background: linear-gradient(to bottom, #020617 0%, #0f172a 100%);
         }
         #ui {
             position: absolute;
@@ -76,7 +74,7 @@ game_html = """
         #start-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 15, 0.95);
+            background: rgba(3, 7, 18, 0.96);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -109,7 +107,7 @@ game_html = """
     <canvas id="gameCanvas" width="480" height="640"></canvas>
     <div id="ui">
         <span id="scoreText">🏠 Khoảng cách: 1000m</span>
-        <span id="shText" style="color: #ff6b81;">🚨 Mẹ SH: 45m</span>
+        <span id="shText" style="color: #ff4757;">🚨 Mẹ SH: 45m</span>
     </div>
     
     <div id="controls">
@@ -120,8 +118,8 @@ game_html = """
     <div id="start-screen">
         <h2 style="color: #ff4757; margin-bottom: 5px;">🌙 ĐUA XE ĐÊM: TRỐN MẸ VỀ NHÀ 🛵</h2>
         <p style="max-width: 360px; color: #cbd5e1; font-size: 13px; line-height: 1.6;">
-            Góc nhìn 2.5D phía sau lưng xe cực bốc! Lách xe điện trốn tiếng pô SH của mẹ gầm rú phía sau.
-            <br><br><b>Né ổ gà, tránh thùng rác và về nhà an toàn!</b>
+            Trốn mẹ lấy chiếc xe điện cá tính đi chơi đêm, bỗng nghe tiếng pô SH quen thuộc phía sau... Mẹ đang đuổi gắt! 
+            <br><br><b>Né ổ gà, tránh thùng rác và phóng về nhà an toàn!</b>
         </p>
         <p style="font-size: 12px; color: #fbbf24;">💻 Máy tính: Phím <b>Trái/Phải</b> hoặc <b>A/D</b><br>📱 Điện thoại: Nút <b>◀ ▶</b> hoặc <b>Vuốt màn hình</b></p>
         <button class="start-btn" onclick="startGame()">BẮT ĐẦU CHẠY TRỐN</button>
@@ -136,8 +134,7 @@ let gameRunning = false;
 let distance = 1000; 
 let shDistance = 45; 
 
-// 3 làn đường theo chiều sâu (0: Trái, 1: Giữa, 2: Phải)
-let playerLane = 1; 
+let playerLane = 1; // 0: Trái, 1: Giữa, 2: Phải
 let obstacles = [];
 let obstacleTimer = 0;
 let roadAnim = 0;
@@ -177,20 +174,15 @@ function startGame() {
     loop();
 }
 
-// Hàm tính tọa độ theo không gian phối cảnh 2.5D (z từ 0 ở chân trời đến 1 ở gần)
 function getPerspectiveCoords(lane, z) {
     let horizonX = 240;
     let horizonY = 180;
     let bottomY = 580;
-    
-    // Độ rộng đường ở đáy và ở chân trời
     let widthBottom = 340;
     let widthHorizon = 40;
     
     let currentY = horizonY + (bottomY - horizonY) * z;
     let currentWidth = widthHorizon + (widthBottom - widthHorizon) * z;
-    
-    // Tọa độ 3 làn: lane 0 (trái), lane 1 (giữa), lane 2 (phải)
     let laneOffset = (lane - 1) * (currentWidth / 3);
     let currentX = horizonX + laneOffset + (currentWidth / 6) * (lane === 0 ? 0.5 : (lane === 2 ? -0.5 : 0));
     
@@ -215,7 +207,7 @@ function update() {
         let type = types[Math.floor(Math.random() * types.length)];
         obstacles.push({
             lane: randomLane,
-            z: 0.1, // Xuất hiện từ xa (chân trời)
+            z: 0.1,
             speed: 0.016,
             type: type
         });
@@ -224,7 +216,6 @@ function update() {
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].z += obstacles[i].speed;
         
-        // Kiểm tra va chạm khi chướng ngại vật đến gần người chơi (z từ 0.8 đến 0.93)
         if (obstacles[i].z >= 0.8 && obstacles[i].z <= 0.93) {
             if (obstacles[i].lane === playerLane) {
                 shDistance -= 14; 
@@ -248,15 +239,15 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Vẽ bầu trời & đường chân trời
+    // 1. Bầu trời đêm
     ctx.fillStyle = "#020617";
     ctx.fillRect(0, 0, 480, 180);
 
-    // 2. Vẽ con đường nhựa 2.5D phối cảnh hình thang
+    // 2. Con đường nhựa 2.5D phối cảnh
     let horizonX = 240;
     let horizonY = 180;
     
-    ctx.fillStyle = "#1e293b"; // Mặt đường
+    ctx.fillStyle = "#1e293b";
     ctx.beginPath();
     ctx.moveTo(horizonX - 25, horizonY);
     ctx.lineTo(horizonX + 25, horizonY);
@@ -267,26 +258,16 @@ function draw() {
 
     // Vỉa hè hai bên
     ctx.fillStyle = "#0f172a";
-    ctx.beginPath();
-    ctx.moveTo(0, 580); ctx.lineTo(40, 580); ctx.lineTo(horizonX - 25, horizonY); ctx.lineTo(0, horizonY); ctx.closePath(); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(480, 580); ctx.lineTo(440, 580); ctx.lineTo(horizonX + 25, horizonY); ctx.lineTo(480, horizonY); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0, 580); ctx.lineTo(40, 580); ctx.lineTo(horizonX - 25, horizonY); ctx.lineTo(0, horizonY); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(480, 580); ctx.lineTo(440, 580); ctx.lineTo(horizonX + 25, horizonY); ctx.lineTo(480, horizonY); ctx.closePath(); ctx.fill();
 
-    // Vạch kẻ chia làn đường chạy sâu vào trong
+    // Vạch chia làn
     ctx.strokeStyle = "#38bdf8";
     ctx.lineWidth = 3;
-    
-    ctx.beginPath();
-    ctx.moveTo(horizonX - 8, horizonY);
-    ctx.lineTo(170, 580);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(horizonX - 8, horizonY); ctx.lineTo(170, 580); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(horizonX + 8, horizonY); ctx.lineTo(310, 580); ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(horizonX + 8, horizonY);
-    ctx.lineTo(310, 580);
-    ctx.stroke();
-
-    // 3. Chướng ngại vật lao từ xa tới
+    // 3. Chướng ngại vật
     for (let obs of obstacles) {
         let coords = getPerspectiveCoords(obs.lane, obs.z);
         let scale = obs.z * 1.6;
@@ -303,30 +284,48 @@ function draw() {
         ctx.restore();
     }
 
-    // 4. Xe điện của con (Góc nhìn từ phía sau lưng ở gần màn hình)
+    // 4. Nhân vật ngồi trên Xe Điện (Con đang lái trốn)
     let playerCoords = getPerspectiveCoords(playerLane, 0.88);
     ctx.save();
-    ctx.font = "64px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🛴", playerCoords.x, playerCoords.y);
+    let px = playerCoords.x;
+    let py = playerCoords.y;
+
+    // Vẽ người con đội mũ bảo hiểm ngồi trên xe điện
+    ctx.fillStyle = "#ef4444"; // Áo đỏ của con
+    ctx.beginPath(); ctx.arc(px, py - 18, 12, 0, Math.PI * 2); ctx.fill(); // Đầu & mũ
+    ctx.fillStyle = "#38bdf8"; // Thân người
+    ctx.fillRect(px - 10, py - 10, 20, 22);
+
+    // Thân xe điện trắng cá tính
+    ctx.fillStyle = "#f8fafc";
+    ctx.fillRect(px - 14, py + 10, 28, 25);
+    ctx.fillStyle = "#0284c7"; // Đèn hậu xe điện
+    ctx.shadowBlur = 12; ctx.shadowColor = "#38bdf8";
+    ctx.fillRect(px - 10, py + 30, 20, 5);
     ctx.restore();
 
-    // 5. Xe SH của mẹ rượt đuổi phía sau (Sắt sạt dưới đáy màn hình)
+    // 5. Nhân vật Mẹ ngồi trên Xe SH rượt đuổi phía sau
     ctx.save();
     let shX = 240 + Math.sin(Date.now() * 0.009) * 30;
-    let shY = 600;
+    let shY = 595;
     
-    let gradient = ctx.createRadialGradient(shX, shY - 20, 10, shX, shY, 130);
-    gradient.addColorStop(0, "rgba(255, 71, 87, 0.5)");
-    gradient.addColorStop(1, "rgba(255, 71, 87, 0)");
+    // Ánh đèn pha xe SH chiếu sáng rực rỡ phía trước
+    let gradient = ctx.createRadialGradient(shX, shY - 30, 10, shX, shY, 140);
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.6)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 480, 480, 160);
+    ctx.fillRect(0, 450, 480, 190);
 
-    ctx.font = "75px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🛵", shX, shY);
+    // Vẽ người mẹ đang lái xe SH (tư thế quyết liệt đuổi theo)
+    ctx.fillStyle = "#1e293b"; // Quần áo mẹ gọn gàng
+    ctx.beginPath(); ctx.arc(shX, shY - 28, 15, 0, Math.PI * 2); ctx.fill(); // Đầu mẹ
+    ctx.fillStyle = "#ffffff"; // Áo khoác trắng của mẹ
+    ctx.fillRect(shX - 14, shY - 18, 28, 28);
+
+    // Thân xe SH trắng hoành tráng của mẹ
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowBlur = 15; ctx.shadowColor = "#ffffff";
+    ctx.fillRect(shX - 18, shY + 6, 36, 32);
     ctx.restore();
 }
 
@@ -337,13 +336,13 @@ function gameOver(isWin) {
     if (isWin) {
         startScreen.innerHTML = `
             <h1 style="color: #4ade80;">🎉 AN TOÀN VỀ NHÀ! 🎉</h1>
-            <p style="color: #fff;">Bạn đã phóng xe điện về nhà thành công trước khi mẹ kịp tóm!</p>
+            <p style="color: #fff;">Bạn đã phóng xe điện về nhà cất chu đáo trước khi mẹ kịp tóm!</p>
             <button class="start-btn" onclick="startGame()">CHƠI LẠI</button>
         `;
     } else {
         startScreen.innerHTML = `
             <h1 style="color: #ef4444;">💥 BỊ MẸ SH TÓM RỒI! 💥</h1>
-            <p style="color: #fff;">Xe SH của mẹ quá mạnh và bạn đã đâm phải chướng ngại vật!</p>
+            <p style="color: #fff;">Mẹ đã phóng xe SH áp sát và tóm gọn bạn tại trận!</p>
             <button class="start-btn" onclick="startGame()">THỬ LẠI</button>
         `;
     }
