@@ -1,6 +1,4 @@
-
-
-   import streamlit as st
+import streamlit as st
 
 st.set_page_config(
     page_title="Đua Xe Đêm: Trốn Mẹ Về Nhà", page_icon="🛵", layout="centered"
@@ -312,5 +310,3 @@ function loop() {
 """
 
 st.components.v1.html(game_html, height=680, scrolling=False)
-
-    
