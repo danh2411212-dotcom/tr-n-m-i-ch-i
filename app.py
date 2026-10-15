@@ -37,9 +37,9 @@ game_html = """
         canvas {
             display: block;
             background: linear-gradient(to bottom, #020617 0%, #0f172a 100%);
+            image-rendering: pixelated;
         }
         
-        /* Giao diện Sảnh Chờ (Lobby) phong cách Tom Gold Run */
         #lobby-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -62,7 +62,7 @@ game_html = """
             box-sizing: border-box;
         }
         .character-preview {
-            font-size: 85px;
+            font-size: 75px;
             margin: 10px 0;
             text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
             animation: bounce 1.5s infinite alternate;
@@ -72,7 +72,6 @@ game_html = """
             100% { transform: translateY(-10px); }
         }
         
-        /* Nút bắt đầu chơi lớn và nổi bật */
         .play-btn {
             background: linear-gradient(45deg, #22c55e, #16a34a);
             color: white;
@@ -91,76 +90,50 @@ game_html = """
             background: linear-gradient(45deg, #16a34a, #15803d);
         }
 
-        /* Giao diện trong trận đấu */
         #game-ui {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 15px;
-            font-weight: bold;
+            top: 15px; left: 15px; right: 15px;
+            display: flex; justify-content: space-between;
+            font-size: 15px; font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
-            pointer-events: none;
-            display: none;
-            z-index: 10;
+            pointer-events: none; display: none; z-index: 10;
         }
         #controls {
             position: absolute;
-            bottom: 15px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 30px;
-            display: none;
-            z-index: 10;
+            bottom: 15px; left: 0; right: 0;
+            display: flex; justify-content: space-around;
+            padding: 0 30px; display: none; z-index: 10;
         }
         .ctrl-btn {
             background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            color: white;
-            font-size: 28px;
-            width: 85px;
-            height: 55px;
-            border-radius: 12px;
-            cursor: pointer;
-            outline: none;
-            user-select: none;
+            border: 2px solid white; color: white;
+            font-size: 28px; width: 85px; height: 55px;
+            border-radius: 12px; cursor: pointer; outline: none; user-select: none;
         }
-        .ctrl-btn:active {
-            background: rgba(255, 71, 87, 0.9);
-        }
+        .ctrl-btn:active { background: rgba(255, 71, 87, 0.9); }
         
-        /* Màn hình kết thúc (Game Over / Win) */
         #end-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(3, 7, 18, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            display: none;
-            z-index: 30;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 20px; display: none; z-index: 30;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- Màn hình sảnh chờ (Lobby trước nhà) -->
+    <!-- Sảnh chờ Tom Gold Run style -->
     <div id="lobby-screen">
         <div class="house-banner">
             <h3 style="color: #38bdf8; margin: 0 0 5px 0;">🏡 NHÀ CỦA TÔI</h3>
-            <p style="color: #cbd5e1; font-size: 12px; margin: 0;">Chuẩn bị trốn mẹ lấy xe điện đi lượn phố đêm!</p>
+            <p style="color: #cbd5e1; font-size: 12px; margin: 0;">Chuẩn bị lấy xe điện độ đi lượn phố đêm!</p>
         </div>
         
         <div>
-            <div class="character-preview">🛴</div>
+            <div class="character-preview">🛵</div>
             <h2 style="color: #ff4757; margin: 5px 0; font-size: 20px;">ĐUA XE ĐÊM: TRỐN MẸ VỀ NHÀ</h2>
             <p style="color: #94a3b8; font-size: 12px; max-width: 300px; line-height: 1.4;">
                 Né ổ gà, tránh thùng rác và chạy trốn tiếng pô SH của mẹ gầm rú phía sau!
@@ -170,22 +143,19 @@ game_html = """
         <button class="play-btn" onclick="startJourney()">BẮT ĐẦU CHƠI</button>
     </div>
 
-    <!-- Canvas vẽ game 2.5D -->
+    <!-- Canvas Game -->
     <canvas id="gameCanvas" width="480" height="640"></canvas>
     
-    <!-- UI thông tin trong game -->
     <div id="game-ui">
         <span id="scoreText">🏠 Khoảng cách: 1000m</span>
         <span id="shText" style="color: #ff4757;">🚨 Mẹ SH: 45m</span>
     </div>
     
-    <!-- Nút điều khiển cảm ứng điện thoại -->
     <div id="controls">
         <button class="ctrl-btn" onclick="moveLeft()">◀</button>
         <button class="ctrl-btn" onclick="moveRight()">▶</button>
     </div>
 
-    <!-- Màn hình kết quả -->
     <div id="end-screen">
         <h1 id="end-title" style="margin-bottom: 10px;"></h1>
         <p id="end-desc" style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px;"></p>
@@ -196,12 +166,13 @@ game_html = """
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
 
 let gameRunning = false;
 let distance = 1000; 
 let shDistance = 45; 
 
-let playerLane = 1; // 0: Trái, 1: Giữa, 2: Phải
+let playerLane = 1; 
 let obstacles = [];
 let obstacleTimer = 0;
 let roadAnim = 0;
@@ -232,7 +203,6 @@ window.addEventListener("touchend", (e) => {
 });
 
 function startJourney() {
-    // Ẩn sảnh chờ, hiện giao diện game và bắt đầu cuộc đua
     document.getElementById("lobby-screen").style.display = "none";
     document.getElementById("game-ui").style.display = "flex";
     document.getElementById("controls").style.display = "flex";
@@ -363,43 +333,52 @@ function draw() {
         ctx.restore();
     }
 
-    // 4. Nhân vật ngồi trên Xe Điện (Con đang lái trốn)
+    // 4. Nhân vật đứa con lái xe điện (Dạng Pixel vuông chi tiết)
     let playerCoords = getPerspectiveCoords(playerLane, 0.88);
     ctx.save();
     let px = playerCoords.x;
     let py = playerCoords.y;
 
-    ctx.fillStyle = "#ef4444"; 
-    ctx.beginPath(); ctx.arc(px, py - 18, 12, 0, Math.PI * 2); ctx.fill(); 
-    ctx.fillStyle = "#38bdf8"; 
-    ctx.fillRect(px - 10, py - 10, 20, 22);
-
+    // Vẽ khối Pixel xe điện trắng cá tính
     ctx.fillStyle = "#f8fafc";
-    ctx.fillRect(px - 14, py + 10, 28, 25);
-    ctx.fillStyle = "#0284c7"; 
-    ctx.shadowBlur = 12; ctx.shadowColor = "#38bdf8";
+    ctx.fillRect(px - 14, py, 28, 35);
+    ctx.fillStyle = "#0f172a"; // Chỗ để chân
+    ctx.fillRect(px - 10, py + 10, 20, 15);
+    ctx.fillStyle = "#38bdf8"; // Đèn hậu xanh sáng rực
+    ctx.shadowBlur = 10; ctx.shadowColor = "#38bdf8";
     ctx.fillRect(px - 10, py + 30, 20, 5);
+
+    // Vẽ nhân vật đứa con ngồi trên xe
+    ctx.fillStyle = "#ef4444"; // Mũ bảo hiểm đỏ
+    ctx.fillRect(px - 8, py - 18, 16, 14);
+    ctx.fillStyle = "#38bdf8"; // Áo khoác
+    ctx.fillRect(px - 10, py - 4, 20, 12);
     ctx.restore();
 
-    // 5. Mẹ chạy xe SH đuổi theo phía sau
+    // 5. Mẹ chạy xe SH đuổi theo phía sau (Dạng Pixel vuông chi tiết)
     ctx.save();
     let shX = 240 + Math.sin(Date.now() * 0.009) * 30;
-    let shY = 595;
+    let shY = 590;
     
+    // Ánh đèn pha xe SH quét sáng rực
     let gradient = ctx.createRadialGradient(shX, shY - 30, 10, shX, shY, 140);
     gradient.addColorStop(0, "rgba(255, 255, 255, 0.6)");
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 450, 480, 190);
 
-    ctx.fillStyle = "#1e293b"; 
-    ctx.beginPath(); ctx.arc(shX, shY - 28, 15, 0, Math.PI * 2); ctx.fill(); 
-    ctx.fillStyle = "#ffffff"; 
-    ctx.fillRect(shX - 14, shY - 18, 28, 28);
-
+    // Thân xe SH trắng của mẹ
     ctx.fillStyle = "#ffffff";
     ctx.shadowBlur = 15; ctx.shadowColor = "#ffffff";
-    ctx.fillRect(shX - 18, shY + 6, 36, 32);
+    ctx.fillRect(shX - 18, shY, 36, 42);
+    ctx.fillStyle = "#94a3b8"; // Kính chắn gió / mặt nạ xe SH
+    ctx.fillRect(shX - 12, shY - 6, 24, 10);
+
+    // Nhân vật người mẹ quyết liệt đuổi theo
+    ctx.fillStyle = "#334155"; // Tóc / mũ bảo hiểm của mẹ
+    ctx.fillRect(px ? (shX - 10) : (shX - 10), shY - 22, 20, 14);
+    ctx.fillStyle = "#e2e8f0"; // Áo trắng của mẹ
+    ctx.fillRect(shX - 12, shY - 8, 24, 12);
     ctx.restore();
 }
 
