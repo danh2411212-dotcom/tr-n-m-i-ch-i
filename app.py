@@ -22,6 +22,7 @@ game_html = """
             justify-content: center;
             height: 100vh;
             overflow: hidden;
+            touch-action: none;
         }
         #game-container {
             position: relative;
@@ -41,23 +42,48 @@ game_html = """
             right: 15px;
             display: flex;
             justify-content: space-between;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
             pointer-events: none;
         }
+        #controls {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 30px;
+        }
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            font-size: 24px;
+            width: 70px;
+            height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            outline: none;
+            user-select: none;
+        }
+        .ctrl-btn:active {
+            background: rgba(255, 71, 87, 0.8);
+        }
         #start-screen {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 10, 20, 0.92);
+            background: rgba(10, 10, 20, 0.94);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             padding: 20px;
+            z-index: 10;
         }
-        button {
+        button.start-btn {
             background: linear-gradient(45deg, #ff4757, #ff6b81);
             color: white;
             border: none;
@@ -70,7 +96,7 @@ game_html = """
             box-shadow: 0 5px 15px rgba(255, 71, 87, 0.5);
             transition: 0.2s;
         }
-        button:hover {
+        button.start-btn:hover {
             transform: scale(1.08);
         }
     </style>
@@ -81,17 +107,23 @@ game_html = """
     <canvas id="gameCanvas" width="480" height="640"></canvas>
     <div id="ui">
         <span id="scoreText">🏠 Khoảng cách: 1000m</span>
-        <span id="shText" style="color: #ff6b81;">🚨 Mẹ SH cách: 45m</span>
+        <span id="shText" style="color: #ff6b81;">🚨 Mẹ SH: 45m</span>
     </div>
     
+    <!-- Nút điều khiển ảo trên màn hình điện thoại -->
+    <div id="controls">
+        <button class="ctrl-btn" onclick="moveLeft()">◀</button>
+        <button class="ctrl-btn" onclick="moveRight()">▶</button>
+    </div>
+
     <div id="start-screen">
         <h2 style="color: #ff4757; margin-bottom: 5px;">🌙 ĐUA XE ĐÊM: TRỐN MẸ VỀ NHÀ 🛵</h2>
         <p style="max-width: 360px; color: #ddd; font-size: 13px; line-height: 1.6;">
-            Trốn mẹ lấy xe điện đi chơi đêm, bỗng nghe tiếng pô SH quen thuộc phía sau... Mẹ đang đuổi gắt! 
-            <br><br><b>Né ổ gà, vượt chướng ngại vật và phóng về nhà an toàn!</b>
+            Trốn mẹ lấy xe điện đi chơi, nghe tiếng pô SH đuổi sát phía sau! 
+            <br><br><b>Né ổ gà, tránh thùng rác và phóng về nhà an toàn!</b>
         </p>
-        <p style="font-size: 12px; color: #ffa502;">👉 Dùng phím <b>Trái / Phải</b> (hoặc A/D) để lách xe.</p>
-        <button onclick="startGame()">BẮT ĐẦU CHẠY TRỐN</button>
+        <p style="font-size: 12px; color: #ffa502;">💻 Máy tính: Dùng phím <b>Trái/Phải</b> hoặc <b>A/D</b><br>📱 Điện thoại: Dùng nút <b>◀ ▶</b> hoặc <b>Vuốt màn hình</b></p>
+        <button class="start-btn" onclick="startGame()">BẮT ĐẦU CHẠY TRỐN</button>
     </div>
 </div>
 
@@ -103,25 +135,47 @@ let gameRunning = false;
 let distance = 1000; 
 let shDistance = 45; 
 
-// 3 làn đường (x = 120, 240, 360)
 const lanes = [120, 240, 360];
 let playerLaneIndex = 1; 
 let playerX = lanes[playerLaneIndex];
-let playerY = 500;
+let playerY = 480;
 
 let obstacles = [];
 let obstacleTimer = 0;
 let roadAnim = 0;
 
-// Điều khiển bàn phím
+// Hàm điều khiển trái / phải chung
+function moveLeft() {
+    if (!gameRunning) return;
+    if (playerLaneIndex > 0) playerLaneIndex--;
+}
+
+function moveRight() {
+    if (!gameRunning) return;
+    if (playerLaneIndex < lanes.length - 1) playerLaneIndex++;
+}
+
+// Điều khiển bàn phím máy tính
 window.addEventListener("keydown", (e) => {
     if (!gameRunning) return;
-    if (e.key === "ArrowLeft" || e.key === "a") {
-        if (playerLaneIndex > 0) playerLaneIndex--;
+    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        moveLeft();
     }
-    if (e.key === "ArrowRight" || e.key === "d") {
-        if (playerLaneIndex < lanes.length - 1) playerLaneIndex++;
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        moveRight();
     }
+});
+
+// Điều khiển vuốt màn hình trên điện thoại
+let touchStartX = 0;
+window.addEventListener("touchstart", (e) => { 
+    touchStartX = e.touches[0].clientX; 
+});
+window.addEventListener("touchend", (e) => {
+    if (!gameRunning) return;
+    let diffX = e.changedTouches[0].clientX - touchStartX;
+    if (diffX > 30) moveRight();
+    if (diffX < -30) moveLeft();
 });
 
 function startGame() {
@@ -137,7 +191,6 @@ function startGame() {
 function update() {
     if (!gameRunning) return;
 
-    // Hiệu ứng lướt đường
     roadAnim += 6;
     if (roadAnim > 40) roadAnim = 0;
 
@@ -162,13 +215,12 @@ function update() {
         });
     }
 
-    // Xử lý va chạm chướng ngại vật
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].y += obstacles[i].speed;
         let obsX = lanes[obstacles[i].lane];
         
         if (obstacles[i].y > playerY - 35 && obstacles[i].y < playerY + 35 && Math.abs(obsX - playerX) < 35) {
-            shDistance -= 12; // Đâm trúng vật cản bị mẹ áp sát
+            shDistance -= 12; 
             obstacles.splice(i, 1);
             if (shDistance <= 0) gameOver(false);
         } else if (obstacles[i].y > canvas.height) {
@@ -180,22 +232,20 @@ function update() {
     if (shDistance <= 5) gameOver(false);
 
     document.getElementById("scoreText").innerText = "🏠 Khoảng cách: " + Math.max(0, Math.floor(distance)) + "m";
-    document.getElementById("shText").innerText = "🚨 Mẹ SH cách: " + Math.max(0, Math.floor(shDistance)) + "m";
+    document.getElementById("shText").innerText = "🚨 Mẹ SH: " + Math.max(0, Math.floor(shDistance)) + "m";
 }
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Vẽ phong cảnh đường phố ban đêm (Giả lập 2.5D)
-    ctx.fillStyle = "#0f172a"; // Vỉa hè / Lề đường tối
+    // 1. Đường phố ban đêm
+    ctx.fillStyle = "#0f172a"; 
     ctx.fillRect(0, 0, 70, canvas.height);
     ctx.fillRect(410, 0, 70, canvas.height);
 
-    // Lòng đường nhựa
     ctx.fillStyle = "#1e293b";
     ctx.fillRect(70, 0, 340, canvas.height);
 
-    // Vạch kẻ đường đứt đoạn chuyển động tạo cảm giác tốc độ
     ctx.strokeStyle = "#facc15";
     ctx.lineWidth = 4;
     ctx.setLineDash([25, 25]);
@@ -206,7 +256,7 @@ function draw() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // 2. Vẽ Chướng ngại vật
+    // 2. Chướng ngại vật
     for (let obs of obstacles) {
         let ox = lanes[obs.lane];
         let oy = obs.y;
@@ -228,54 +278,47 @@ function draw() {
         ctx.restore();
     }
 
-    // 3. Vẽ Xe Điện của Con (Tạo hình sắc nét phong cách 2.5D)
+    // 3. Xe điện của con
     ctx.save();
     let cx = playerX;
     let cy = playerY;
 
-    // Đèn hậu xe điện sáng rực
     ctx.fillStyle = "#22d3ee";
     ctx.shadowBlur = 12;
     ctx.shadowColor = "#22d3ee";
     ctx.fillRect(cx - 12, cy + 18, 24, 5);
 
-    // Thân xe điện trắng cá tính
     ctx.fillStyle = "#f8fafc";
     ctx.beginPath();
     ctx.roundRect(cx - 14, cy - 20, 28, 42, 8);
     ctx.fill();
     
-    // Yên xe đen
     ctx.fillStyle = "#0f172a";
     ctx.fillRect(cx - 10, cy - 5, 20, 16);
 
-    // Người con đội mũ
     ctx.fillStyle = "#ef4444"; 
     ctx.beginPath();
     ctx.arc(cx, cy - 12, 10, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // 4. Vẽ xe SH của Mẹ rượt đuổi phía sau (Có ánh đèn pha chiếu sáng rực rỡ)
+    // 4. Xe SH của mẹ đuổi theo
     ctx.save();
     let shX = 240 + Math.sin(Date.now() * 0.008) * 35;
     let shY = 585;
 
-    // Hiệu ứng ánh đèn pha SH quét phía trước
     let gradient = ctx.createRadialGradient(shX, shY, 15, shX, shY + 60, 140);
     gradient.addColorStop(0, "rgba(255, 255, 255, 0.45)");
     gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 420, 480, 220);
 
-    // Thân xe SH trắng của mẹ
     ctx.fillStyle = "#ffffff";
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#ffffff";
     ctx.beginPath();
     ctx.roundRect(shX - 18, shY - 12, 36, 50, 12);
     ctx.fill();
-    
     ctx.restore();
 }
 
@@ -286,14 +329,14 @@ function gameOver(isWin) {
     if (isWin) {
         startScreen.innerHTML = `
             <h1 style="color: #22c55e;">🎉 AN TOÀN VỀ NHÀ! 🎉</h1>
-            <p style="color: #fff;">Bạn đã phi xe điện về cất chu đáo trước khi mẹ kịp đuổi tới nơi!</p>
-            <button onclick="startGame()">CHƠI LẠI</button>
+            <p style="color: #fff;">Bạn đã phóng xe điện về nhà thành công trước khi mẹ kịp tóm!</p>
+            <button class="start-btn" onclick="startGame()">CHƠI LẠI</button>
         `;
     } else {
         startScreen.innerHTML = `
             <h1 style="color: #ef4444;">💥 BỊ MẸ SH TÓM RỒI! 💥</h1>
-            <p style="color: #fff;">Xe SH của mẹ quá mạnh và bạn đã lỡ đâm phải vật cản. Tới công chuyện luôn!</p>
-            <button onclick="startGame()">THỬ LẠI</button>
+            <p style="color: #fff;">Xe SH của mẹ quá mạnh và bạn đã đâm phải vật cản. Ăn đòn chắc luôn!</p>
+            <button class="start-btn" onclick="startGame()">THỬ LẠI</button>
         `;
     }
 }
